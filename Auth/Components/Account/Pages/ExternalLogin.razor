@@ -55,12 +55,12 @@
 
     protected override async Task OnInitializedAsync() {
         if (RemoteError is not null) {
-            RedirectManager.RedirectToWithStatus("Account/Login", $"Error from external provider: {RemoteError}", HttpContext);
+            RedirectManager.RedirectToWithStatus("account/login", $"Error from external provider: {RemoteError}", HttpContext);
         }
 
         var info = await SignInManager.GetExternalLoginInfoAsync();
         if (info is null) {
-            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
+            RedirectManager.RedirectToWithStatus("account/login", "Error loading external login information.", HttpContext);
         }
 
         _externalLoginInfo = info;
@@ -73,7 +73,7 @@
 
             // We should only reach this page via the login callback, so redirect back to
             // the login page if we get here some other way.
-            RedirectManager.RedirectTo("Account/Login");
+            RedirectManager.RedirectTo("account/login");
         }
     }
 
@@ -93,7 +93,7 @@
             RedirectManager.RedirectTo(ReturnUrl);
         }
         else if (result.IsLockedOut) {
-            RedirectManager.RedirectTo("Account/Lockout");
+            RedirectManager.RedirectTo("account/lockout");
         }
 
         // If the user does not have an account, then ask the user to create an account.
@@ -104,9 +104,9 @@
 
     private async Task OnValidSubmitAsync() {
         var emailStore = GetEmailStore();
-        var user = CreateUser();
+        var user = new ApplicationUser();
 
-        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+        await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
         var result = await UserManager.CreateAsync(user);
@@ -120,13 +120,13 @@
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
                 var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                    NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+                    NavigationManager.ToAbsoluteUri("account/confirmEmail").AbsoluteUri,
                     new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
                 await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
                 // If account confirmation is required, we need to show the link if we don't have a real email sender
                 if (UserManager.Options.SignIn.RequireConfirmedAccount) {
-                    RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
+                    RedirectManager.RedirectTo("account/registerConfirmation", new Dictionary<string, object?> { ["email"] = Input.Email });
                 }
 
                 await SignInManager.SignInAsync(user, isPersistent: false, _externalLoginInfo.LoginProvider);
@@ -135,16 +135,6 @@
         }
 
         _message = $"Error: {string.Join(",", result.Errors.Select(error => error.Description))}";
-    }
-
-    private ApplicationUser CreateUser() {
-        try {
-            return Activator.CreateInstance<ApplicationUser>();
-        }
-        catch {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                                                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor");
-        }
     }
 
     private IUserEmailStore<ApplicationUser> GetEmailStore() {
@@ -156,6 +146,10 @@
     }
 
     private sealed class InputModel {
+        [Required]
+        [Display(Name = "Username")]
+        public string Username{ get; set; } = "";
+        
         [Required] [EmailAddress] public string Email{ get; set; } = "";
     }
 

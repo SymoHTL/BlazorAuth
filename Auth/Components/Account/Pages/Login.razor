@@ -36,7 +36,7 @@
                 <div>
                     <MudLink href="account/forgotPassword">Forgot your password?</MudLink>
                     <br/>
-                    <MudLink href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</MudLink>
+                    <MudLink href="@(NavigationManager.GetUriWithQueryParameters("account/register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</MudLink>
                     <br/>
                     <MudLink href="account/resendEmailConfirmation">Resend email confirmation</MudLink>
                 </div>

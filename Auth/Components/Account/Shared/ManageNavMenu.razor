@@ -2,24 +2,24 @@
 
 <MudList>
     <MudListItem>
-        <NavLink href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
+        <MudLink Href="account/manage">Profile</MudLink>
     </MudListItem>
     <MudListItem>
-        <NavLink href="Account/Manage/Email">Email</NavLink>
+        <MudLink Href="account/manage/email">Email</MudLink>
     </MudListItem>
     <MudListItem>
-        <NavLink href="Account/Manage/ChangePassword">Password</NavLink>
+        <MudLink Href="account/manage/changePassword">Password</MudLink>
     </MudListItem>
     @if (_hasExternalLogins) {
         <MudListItem>
-            <NavLink href="Account/Manage/ExternalLogins">External logins</NavLink>
+            <MudLink Href="account/manage/externalLogins">External logins</MudLink>
         </MudListItem>
     }
     <MudListItem>
-        <NavLink href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
+        <MudLink Href="account/manage/twoFactorAuthentication">Two-factor authentication</MudLink>
     </MudListItem>
     <MudListItem>
-        <NavLink href="Account/Manage/PersonalData">Personal data</NavLink>
+        <MudLink Href="account/manage/personalData">Personal data</MudLink>
     </MudListItem>
 </MudList>
 

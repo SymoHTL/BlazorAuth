@@ -21,6 +21,11 @@
             <MudDivider/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
+                <MudStaticTextField @bind-Value="Input.Username" autocomplete="username" aria-required="true"
+                                    InputMode="InputMode.text" InputType="InputType.Text" Label="Username"
+                                    Required="true" Placeholder="username" For="() => Input.Username"/>
+            </div>
+            <div class="form-floating mb-3">
                 <MudStaticTextField @bind-Value="Input.Email" autocomplete="email" aria-required="true"
                                     InputMode="InputMode.email" InputType="InputType.Email" Label="Email address"
                                     Required="true" Placeholder="name@example.com" For="() => Input.Email"/>
@@ -57,9 +62,9 @@
     private string? Message => _identityErrors is null ? null : $"Error: {string.Join(", ", _identityErrors.Select(error => error.Description))}";
 
     public async Task RegisterUser(EditContext editContext) {
-        var user = CreateUser();
+        var user = new ApplicationUser();
 
-        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+        await UserStore.SetUserNameAsync(user,  Input.Username, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
         var result = await UserManager.CreateAsync(user, Input.Password);
@@ -75,7 +80,7 @@
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
         var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+            NavigationManager.ToAbsoluteUri("account/confirmEmail").AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
 
         await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
@@ -83,32 +88,25 @@
         if (UserManager.Options.SignIn.RequireConfirmedAccount) {
             RedirectManager.RedirectTo(
                 "account/registerConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+                new Dictionary<string, object?> { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
         }
 
         await SignInManager.SignInAsync(user, isPersistent: false);
         RedirectManager.RedirectTo(ReturnUrl);
     }
 
-    private ApplicationUser CreateUser() {
-        try {
-            return Activator.CreateInstance<ApplicationUser>();
-        }
-        catch {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                                                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor.");
-        }
-    }
-
     private IUserEmailStore<ApplicationUser> GetEmailStore() {
         if (!UserManager.SupportsUserEmail) {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
-
         return (IUserEmailStore<ApplicationUser>)UserStore;
     }
 
     private sealed class InputModel {
+        [Required]
+        [Display(Name = "Username")]
+        public string Username{ get; set; } = "";
+        
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]
