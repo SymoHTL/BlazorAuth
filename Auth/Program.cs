@@ -40,6 +40,32 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+
+builder.Services.AddAuthentication()
+    .AddGoogle(options => {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ??
+                           throw new InvalidOperationException("Google-ClientId must be provided");
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ??
+                               throw new InvalidOperationException("Google-ClientSecret must be provided");
+    });
+    //.AddFacebook(options =>
+    //{
+    //    IConfigurationSection FBAuthNSection =
+    //        config.GetSection("Authentication:FB");
+    //    options.ClientId = FBAuthNSection["ClientId"];
+    //    options.ClientSecret = FBAuthNSection["ClientSecret"];
+    //})
+    //.AddMicrosoftAccount(microsoftOptions => {
+    //    microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"] ?? throw new InvalidOperationException("Microsoft-ClientId must be provided");
+    //    microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"] ?? throw new InvalidOperationException("Microsoft-ClientSecret must be provided");
+    //});
+//.AddTwitter(twitterOptions =>
+//{
+//    twitterOptions.ConsumerKey = config["Authentication:Twitter:ConsumerAPIKey"];
+//    twitterOptions.ConsumerSecret = config["Authentication:Twitter:ConsumerSecret"];
+//    twitterOptions.RetrieveUserDetails = true;
+//});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
