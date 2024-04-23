@@ -102,9 +102,8 @@
         }
 
         // If the user does not have an account, then ask the user to create an account.
-        if (_externalLoginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Email)) {
-            Input.Email = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? "";
-        }
+        if (_externalLoginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Email)) Input.Email = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? "";
+        if (_externalLoginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Name)) Input.Username = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Name) ?? "";
     }
 
     private async Task OnValidSubmitAsync() {
@@ -113,7 +112,7 @@
 
         await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
+        
         var result = await UserManager.CreateAsync(user);
         if (result.Succeeded) {
             result = await UserManager.AddLoginAsync(user, _externalLoginInfo);

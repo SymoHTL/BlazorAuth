@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,7 +35,24 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(
 );
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentityCore<ApplicationUser>(options => {
+        options.SignIn.RequireConfirmedAccount = true;
+        
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.AllowedForNewUsers = true;
+
+        options.User.RequireUniqueEmail = true;
+        options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
+
+        // Default Password settings.
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequiredUniqueChars = 1;
+    })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
@@ -43,10 +62,12 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 
 builder.Services.AddAuthentication()
     .AddGoogle(options => {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ??
-                           throw new InvalidOperationException("Google-ClientId must be provided");
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ??
-                               throw new InvalidOperationException("Google-ClientSecret must be provided");
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+        
+        options.SaveTokens = true;
+        
+        options.Validate();
     });
     //.AddFacebook(options =>
     //{
@@ -54,17 +75,20 @@ builder.Services.AddAuthentication()
     //        config.GetSection("Authentication:FB");
     //    options.ClientId = FBAuthNSection["ClientId"];
     //    options.ClientSecret = FBAuthNSection["ClientSecret"];
+    //    options.Validate();
     //})
     //.AddMicrosoftAccount(microsoftOptions => {
     //    microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"] ?? throw new InvalidOperationException("Microsoft-ClientId must be provided");
     //    microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"] ?? throw new InvalidOperationException("Microsoft-ClientSecret must be provided");
+    //    microsoftOptions.Validate();    
     //});
-//.AddTwitter(twitterOptions =>
-//{
-//    twitterOptions.ConsumerKey = config["Authentication:Twitter:ConsumerAPIKey"];
-//    twitterOptions.ConsumerSecret = config["Authentication:Twitter:ConsumerSecret"];
-//    twitterOptions.RetrieveUserDetails = true;
-//});
+    //.AddTwitter(twitterOptions =>
+    //{
+    //    twitterOptions.ConsumerKey = config["Authentication:Twitter:ConsumerAPIKey"];
+    //    twitterOptions.ConsumerSecret = config["Authentication:Twitter:ConsumerSecret"];
+    //    twitterOptions.RetrieveUserDetails = true;
+    //    twitterOptions.Validate();
+    //});
 
 var app = builder.Build();
 
