@@ -26,6 +26,11 @@
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
+                <MudStaticTextField @bind-Value="Input.Username" autocomplete="username" aria-required="true"
+                                    InputMode="InputMode.text" InputType="InputType.Text" Label="Username"
+                                    Required="true" Placeholder="Please enter your username." For="() => Input.Username"/>
+            </div>
+            <div class="form-floating mb-3">
                 <MudStaticTextField @bind-Value="Input.Email" autocomplete="email" aria-required="true"
                                     InputMode="InputMode.email" InputType="InputType.Email" Label="Email address"
                                     Required="true" Placeholder="Please enter your email." For="() => Input.Email"/>
@@ -41,15 +46,15 @@
     private string? _message;
     private ExternalLoginInfo _externalLoginInfo = default!;
 
-    [CascadingParameter] private HttpContext HttpContext{ get; set; } = default!;
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
-    [SupplyParameterFromForm] private InputModel Input{ get; set; } = new();
+    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
 
-    [SupplyParameterFromQuery] private string? RemoteError{ get; set; }
+    [SupplyParameterFromQuery] private string? RemoteError { get; set; }
 
-    [SupplyParameterFromQuery] private string? ReturnUrl{ get; set; }
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
 
-    [SupplyParameterFromQuery] private string? Action{ get; set; }
+    [SupplyParameterFromQuery] private string? Action { get; set; }
 
     private string? ProviderDisplayName => _externalLoginInfo.ProviderDisplayName;
 
@@ -71,14 +76,14 @@
                 return;
             }
 
-            // We should only reach this page via the login callback, so redirect back to
-            // the login page if we get here some other way.
+// We should only reach this page via the login callback, so redirect back to
+// the login page if we get here some other way.
             RedirectManager.RedirectTo("account/login");
         }
     }
 
     private async Task OnLoginCallbackAsync() {
-        // Sign in the user with this external login provider if the user already has a login.
+// Sign in the user with this external login provider if the user already has a login.
         var result = await SignInManager.ExternalLoginSignInAsync(
             _externalLoginInfo.LoginProvider,
             _externalLoginInfo.ProviderKey,
@@ -96,7 +101,7 @@
             RedirectManager.RedirectTo("account/lockout");
         }
 
-        // If the user does not have an account, then ask the user to create an account.
+// If the user does not have an account, then ask the user to create an account.
         if (_externalLoginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Email)) {
             Input.Email = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? "";
         }
@@ -124,7 +129,7 @@
                     new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
                 await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-                // If account confirmation is required, we need to show the link if we don't have a real email sender
+// If account confirmation is required, we need to show the link if we don't have a real email sender
                 if (UserManager.Options.SignIn.RequireConfirmedAccount) {
                     RedirectManager.RedirectTo("account/registerConfirmation", new Dictionary<string, object?> { ["email"] = Input.Email });
                 }
@@ -148,9 +153,9 @@
     private sealed class InputModel {
         [Required]
         [Display(Name = "Username")]
-        public string Username{ get; set; } = "";
-        
-        [Required] [EmailAddress] public string Email{ get; set; } = "";
+        public string Username { get; set; } = "";
+
+        [Required] [EmailAddress] public string Email { get; set; } = "";
     }
 
 }
