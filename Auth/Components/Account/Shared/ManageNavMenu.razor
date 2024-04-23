@@ -1,35 +1,33 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@inject SignInManager<ApplicationUser> SignInManager
 
-@inject SignInManager<ApplicationUser> SignInManager
-
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/Email">Email</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/ChangePassword">Password</NavLink>
-    </li>
-    @if (hasExternalLogins) {
-        <li class="nav-item">
-            <NavLink class="nav-link" href="Account/Manage/ExternalLogins">External logins</NavLink>
-        </li>
+<MudList>
+    <MudListItem>
+        <NavLink href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
+    </MudListItem>
+    <MudListItem>
+        <NavLink href="Account/Manage/Email">Email</NavLink>
+    </MudListItem>
+    <MudListItem>
+        <NavLink href="Account/Manage/ChangePassword">Password</NavLink>
+    </MudListItem>
+    @if (_hasExternalLogins) {
+        <MudListItem>
+            <NavLink href="Account/Manage/ExternalLogins">External logins</NavLink>
+        </MudListItem>
     }
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/PersonalData">Personal data</NavLink>
-    </li>
-</ul>
+    <MudListItem>
+        <NavLink href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
+    </MudListItem>
+    <MudListItem>
+        <NavLink href="Account/Manage/PersonalData">Personal data</NavLink>
+    </MudListItem>
+</MudList>
 
 @code {
-    private bool hasExternalLogins;
+    private bool _hasExternalLogins;
 
     protected override async Task OnInitializedAsync() {
-        hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+        _hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
     }
 
 }

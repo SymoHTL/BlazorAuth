@@ -1,11 +1,5 @@
 ﻿@page "/Account/Manage/EnableAuthenticator"
 
-@using System.ComponentModel.DataAnnotations
-@using System.Globalization
-@using System.Text
-@using System.Text.Encodings.Web
-@using Microsoft.AspNetCore.Identity
-
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityUserAccessor UserAccessor
 @inject UrlEncoder UrlEncoder
@@ -14,97 +8,97 @@
 
 <PageTitle>Configure authenticator app</PageTitle>
 
-@if (recoveryCodes is not null) {
-    <ShowRecoveryCodes RecoveryCodes="recoveryCodes.ToArray()" StatusMessage="@message"/>
+@if (_recoveryCodes is not null) {
+    <ShowRecoveryCodes RecoveryCodes="_recoveryCodes.ToArray()" StatusMessage="@_message"/>
 }
 else {
-    <StatusMessage Message="@message"/>
-    <h3>Configure authenticator app</h3>
+    <StatusMessage Message="@_message"/>
+    <MudText Typo="Typo.h4">Configure authenticator app</MudText>
     <div>
-        <p>To use an authenticator app go through the following steps:</p>
-        <ol class="list">
-            <li>
-                <p>
+        <MudText>To use an authenticator app go through the following steps:</MudText>
+        <MudList>
+            <MudListItem>
+                <MudText>
                     Download a two-factor authenticator app like Microsoft Authenticator for
-                    <a href="https://go.microsoft.com/fwlink/?Linkid=825072">Android</a> and
-                    <a href="https://go.microsoft.com/fwlink/?Linkid=825073">iOS</a> or
+                    <MudLink Href="https://go.microsoft.com/fwlink/?Linkid=825072">Android</MudLink> and
+                    <MudLink Href="https://go.microsoft.com/fwlink/?Linkid=825073">iOS</MudLink> or
                     Google Authenticator for
-                    <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=en">Android</a> and
-                    <a href="https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8">iOS</a>.
-                </p>
-            </li>
-            <li>
-                <p>Scan the QR Code or enter this key <kbd>@sharedKey</kbd> into your two factor authenticator app. Spaces and casing do not matter.</p>
-                <div class="alert alert-info">Learn how to <a href="https://go.microsoft.com/fwlink/?Linkid=852423">enable QR code generation</a>.</div>
+                    <MudLink Href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=en">Android</MudLink> and
+                    <MudLink Href="https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8">iOS</MudLink>.
+                </MudText>
+            </MudListItem>
+            <MudListItem>
+                <MudText>Scan the QR Code or enter this key <kbd>@_sharedKey</kbd> into your two factor authenticator app. Spaces and casing do not matter.</MudText>
+                <div class="alert alert-info">Learn how to <MudLink href="https://go.microsoft.com/fwlink/?Linkid=852423">enable QR code generation</MudLink>.</div>
                 <div></div>
-                <div data-url="@authenticatorUri"></div>
-            </li>
-            <li>
-                <p>
+                <div data-url="@_authenticatorUri"></div>
+            </MudListItem>
+            
+            <MudListItem>
+                <MudText>
                     Once you have scanned the QR code or input the key above, your two factor authentication app will provide you
                     with a unique code. Enter the code in the confirmation box below.
-                </p>
+                </MudText>
                 <div class="row">
                     <div class="col-md-6">
                         <EditForm Model="Input" FormName="send-code" OnValidSubmit="OnValidSubmitAsync" method="post">
                             <DataAnnotationsValidator/>
                             <div class="form-floating mb-3">
-                                <InputText @bind-Value="Input.Code" class="form-control" autocomplete="off" placeholder="Please enter the code."/>
-                                <label for="code" class="control-label form-label">Verification Code</label>
-                                <ValidationMessage For="() => Input.Code" class="text-danger"/>
+                                <MudStaticTextField @bind-Value="Input.Code" autocomplete="off" Label="Verification Code"
+                                                    For="() => Input.Code" Placeholder="Please enter the code."/>
                             </div>
-                            <button type="submit" class="w-100 btn btn-lg btn-primary">Verify</button>
+                            <MudStaticButton Variant="Variant.Filled" FullWidth="true" Color="Color.Info">Verify</MudStaticButton>
                             <ValidationSummary class="text-danger" role="alert"/>
                         </EditForm>
                     </div>
                 </div>
-            </li>
-        </ol>
+            </MudListItem>
+        </MudList>
     </div>
 }
 
 @code {
     private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
-    private string? message;
-    private ApplicationUser user = default!;
-    private string? sharedKey;
-    private string? authenticatorUri;
-    private IEnumerable<string>? recoveryCodes;
+    private string? _message;
+    private ApplicationUser _user = default!;
+    private string? _sharedKey;
+    private string? _authenticatorUri;
+    private IEnumerable<string>? _recoveryCodes;
 
     [CascadingParameter] private HttpContext HttpContext{ get; set; } = default!;
 
     [SupplyParameterFromForm] private InputModel Input{ get; set; } = new();
 
     protected override async Task OnInitializedAsync() {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        _user = await UserAccessor.GetRequiredUserAsync(HttpContext);
 
-        await LoadSharedKeyAndQrCodeUriAsync(user);
+        await LoadSharedKeyAndQrCodeUriAsync(_user);
     }
 
     private async Task OnValidSubmitAsync() {
         // Strip spaces and hyphens
         var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-        var is2faTokenValid = await UserManager.VerifyTwoFactorTokenAsync(
-            user, UserManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
+        var is2FaTokenValid = await UserManager.VerifyTwoFactorTokenAsync(
+            _user, UserManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
 
-        if (!is2faTokenValid) {
-            message = "Error: Verification code is invalid.";
+        if (!is2FaTokenValid) {
+            _message = "Error: Verification code is invalid.";
             return;
         }
 
-        await UserManager.SetTwoFactorEnabledAsync(user, true);
-        var userId = await UserManager.GetUserIdAsync(user);
-        Logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
+        await UserManager.SetTwoFactorEnabledAsync(_user, true);
+        var userId = await UserManager.GetUserIdAsync(_user);
+        Logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app", userId);
 
-        message = "Your authenticator app has been verified.";
+        _message = "Your authenticator app has been verified.";
 
-        if (await UserManager.CountRecoveryCodesAsync(user) == 0) {
-            recoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+        if (await UserManager.CountRecoveryCodesAsync(_user) == 0) {
+            _recoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(_user, 10);
         }
         else {
-            RedirectManager.RedirectToWithStatus("Account/Manage/TwoFactorAuthentication", message, HttpContext);
+            RedirectManager.RedirectToWithStatus("Account/Manage/TwoFactorAuthentication", _message, HttpContext);
         }
     }
 
@@ -116,10 +110,10 @@ else {
             unformattedKey = await UserManager.GetAuthenticatorKeyAsync(user);
         }
 
-        sharedKey = FormatKey(unformattedKey!);
+        _sharedKey = FormatKey(unformattedKey!);
 
         var email = await UserManager.GetEmailAsync(user);
-        authenticatorUri = GenerateQrCodeUri(email!, unformattedKey!);
+        _authenticatorUri = GenerateQrCodeUri(email!, unformattedKey!);
     }
 
     private string FormatKey(string unformattedKey) {

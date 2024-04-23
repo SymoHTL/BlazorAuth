@@ -1,12 +1,4 @@
-﻿@page "/Account/ExternalLogin"
-
-@using System.ComponentModel.DataAnnotations
-@using System.Security.Claims
-@using System.Text
-@using System.Text.Encodings.Web
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.WebUtilities
-
+﻿@page "/account/externalLogin"
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
@@ -17,16 +9,16 @@
 
 <PageTitle>Register</PageTitle>
 
-<StatusMessage Message="@message"/>
-<h1>Register</h1>
-<h2>Associate your @ProviderDisplayName account.</h2>
-<hr/>
+<StatusMessage Message="@_message"/>
+<MudText Typo="Typo.h2">Register</MudText>
+<MudText Typo="Typo.h3">Associate your @ProviderDisplayName account.</MudText>
+<MudDivider/>
 
-<div class="alert alert-info">
+<MudAlert Severity="Severity.Info">
     You've successfully authenticated with <strong>@ProviderDisplayName</strong>.
     Please enter an email address for this site below and click the Register button to finish
     logging in.
-</div>
+</MudAlert>
 
 <div class="row">
     <div class="col-md-4">
@@ -34,11 +26,11 @@
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="email" placeholder="Please enter your email."/>
-                <label for="email" class="form-label">Email</label>
-                <ValidationMessage For="() => Input.Email"/>
+                <MudStaticTextField @bind-Value="Input.Email" autocomplete="email" aria-required="true"
+                                    InputMode="InputMode.email" InputType="InputType.Email" Label="Email address"
+                                    Required="true" Placeholder="Please enter your email." For="() => Input.Email"/>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <MudStaticButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Register</MudStaticButton>
         </EditForm>
     </div>
 </div>
@@ -46,8 +38,8 @@
 @code {
     public const string LoginCallbackAction = "LoginCallback";
 
-    private string? message;
-    private ExternalLoginInfo externalLoginInfo = default!;
+    private string? _message;
+    private ExternalLoginInfo _externalLoginInfo = default!;
 
     [CascadingParameter] private HttpContext HttpContext{ get; set; } = default!;
 
@@ -59,7 +51,7 @@
 
     [SupplyParameterFromQuery] private string? Action{ get; set; }
 
-    private string? ProviderDisplayName => externalLoginInfo.ProviderDisplayName;
+    private string? ProviderDisplayName => _externalLoginInfo.ProviderDisplayName;
 
     protected override async Task OnInitializedAsync() {
         if (RemoteError is not null) {
@@ -71,7 +63,7 @@
             RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
         }
 
-        externalLoginInfo = info;
+        _externalLoginInfo = info;
 
         if (HttpMethods.IsGet(HttpContext.Request.Method)) {
             if (Action == LoginCallbackAction) {
@@ -88,16 +80,16 @@
     private async Task OnLoginCallbackAsync() {
         // Sign in the user with this external login provider if the user already has a login.
         var result = await SignInManager.ExternalLoginSignInAsync(
-            externalLoginInfo.LoginProvider,
-            externalLoginInfo.ProviderKey,
+            _externalLoginInfo.LoginProvider,
+            _externalLoginInfo.ProviderKey,
             isPersistent: false,
             bypassTwoFactor: true);
 
         if (result.Succeeded) {
             Logger.LogInformation(
-                "{Name} logged in with {LoginProvider} provider.",
-                externalLoginInfo.Principal.Identity?.Name,
-                externalLoginInfo.LoginProvider);
+                "{Name} logged in with {LoginProvider} provider",
+                _externalLoginInfo.Principal.Identity?.Name,
+                _externalLoginInfo.LoginProvider);
             RedirectManager.RedirectTo(ReturnUrl);
         }
         else if (result.IsLockedOut) {
@@ -105,8 +97,8 @@
         }
 
         // If the user does not have an account, then ask the user to create an account.
-        if (externalLoginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Email)) {
-            Input.Email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? "";
+        if (_externalLoginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Email)) {
+            Input.Email = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? "";
         }
     }
 
@@ -119,9 +111,9 @@
 
         var result = await UserManager.CreateAsync(user);
         if (result.Succeeded) {
-            result = await UserManager.AddLoginAsync(user, externalLoginInfo);
+            result = await UserManager.AddLoginAsync(user, _externalLoginInfo);
             if (result.Succeeded) {
-                Logger.LogInformation("User created an account using {Name} provider.", externalLoginInfo.LoginProvider);
+                Logger.LogInformation("User created an account using {Name} provider", _externalLoginInfo.LoginProvider);
 
                 var userId = await UserManager.GetUserIdAsync(user);
                 var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
@@ -137,12 +129,12 @@
                     RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
                 }
 
-                await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
+                await SignInManager.SignInAsync(user, isPersistent: false, _externalLoginInfo.LoginProvider);
                 RedirectManager.RedirectTo(ReturnUrl);
             }
         }
 
-        message = $"Error: {string.Join(",", result.Errors.Select(error => error.Description))}";
+        _message = $"Error: {string.Join(",", result.Errors.Select(error => error.Description))}";
     }
 
     private ApplicationUser CreateUser() {

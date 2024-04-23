@@ -1,25 +1,25 @@
-﻿@page "/Account/Manage/PersonalData"
+﻿@page "/account/manage/personalData"
 
 @inject IdentityUserAccessor UserAccessor
 
 <PageTitle>Personal Data</PageTitle>
 
 <StatusMessage/>
-<h3>Personal Data</h3>
+<MudText Typo="Typo.h4">Personal Data</MudText>
 
 <div class="row">
     <div class="col-md-6">
-        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
-        <p>
+        <MudText>Your account contains personal data that you have given us. This page allows you to download or delete that data.</MudText>
+        <MudText>
             <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-        </p>
-        <form action="Account/Manage/DownloadPersonalData" method="post">
+        </MudText>
+        <form action="account/manage/downloadPersonalData" method="post">
             <AntiforgeryToken/>
-            <button class="btn btn-primary" type="submit">Download</button>
+            <MudStaticButton Variant="Variant.Filled" Color="Color.Info">Download</MudStaticButton>
         </form>
-        <p>
-            <a href="Account/Manage/DeletePersonalData" class="btn btn-danger">Delete</a>
-        </p>
+        <MudText>
+            <MudLink href="account/manage/deletePersonalData" class="btn btn-danger">Delete</MudLink>
+        </MudText>
     </div>
 </div>
 

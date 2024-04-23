@@ -1,21 +1,16 @@
-﻿@page "/Account/ConfirmEmailChange"
-
-@using System.Text
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.WebUtilities
-
+﻿@page "/account/confirmEmailChange"
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Confirm email change</PageTitle>
 
-<h1>Confirm email change</h1>
+<MudText Typo="Typo.h2">Confirm email change</MudText>
 
-<StatusMessage Message="@message"/>
+<StatusMessage Message="@_message"/>
 
 @code {
-    private string? message;
+    private string? _message;
 
     [CascadingParameter] private HttpContext HttpContext{ get; set; } = default!;
 
@@ -33,14 +28,14 @@
 
         var user = await UserManager.FindByIdAsync(UserId);
         if (user is null) {
-            message = "Unable to find user with Id '{userId}'";
+            _message = "Unable to find user with Id '{userId}'";
             return;
         }
 
         var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
         var result = await UserManager.ChangeEmailAsync(user, Email, code);
         if (!result.Succeeded) {
-            message = "Error changing email.";
+            _message = "Error changing email.";
             return;
         }
 
@@ -48,12 +43,12 @@
         // we need to update the user name.
         var setUserNameResult = await UserManager.SetUserNameAsync(user, Email);
         if (!setUserNameResult.Succeeded) {
-            message = "Error changing user name.";
+            _message = "Error changing user name.";
             return;
         }
 
         await SignInManager.RefreshSignInAsync(user);
-        message = "Thank you for confirming your email change.";
+        _message = "Thank you for confirming your email change.";
     }
 
 }

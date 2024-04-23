@@ -1,7 +1,4 @@
-﻿@page "/Account/Manage"
-
-@using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Identity
+﻿@page "/account/manage"
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
@@ -10,7 +7,7 @@
 
 <PageTitle>Profile</PageTitle>
 
-<h3>Profile</h3>
+<MudText Typo="Typo.h4">Profile</MudText>
 <StatusMessage/>
 
 <div class="row">
@@ -19,45 +16,43 @@
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <input type="text" value="@username" class="form-control" placeholder="Please choose your username." disabled/>
-                <label for="username" class="form-label">Username</label>
+                <MudStaticTextField Value="_username" autocomplete="username" Label="Username" Placeholder="Please choose your username." Disabled/>
             </div>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
-                <label for="phone-number" class="form-label">Phone number</label>
-                <ValidationMessage For="() => Input.PhoneNumber" class="text-danger"/>
+                <MudStaticTextField @bind-Value="Input.PhoneNumber" InputMode="InputMode.tel" InputType="InputType.Telephone"
+                                    autocomplete="phone-number" Label="Phone number" Placeholder="Please enter your phone number."/>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+            <MudStaticButton Variant="Variant.Filled" Color="Color.Info">Save</MudStaticButton>
         </EditForm>
     </div>
 </div>
 
 @code {
-    private ApplicationUser user = default!;
-    private string? username;
-    private string? phoneNumber;
+    private ApplicationUser _user = default!;
+    private string? _username;
+    private string? _phoneNumber;
 
     [CascadingParameter] private HttpContext HttpContext{ get; set; } = default!;
 
     [SupplyParameterFromForm] private InputModel Input{ get; set; } = new();
 
     protected override async Task OnInitializedAsync() {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        username = await UserManager.GetUserNameAsync(user);
-        phoneNumber = await UserManager.GetPhoneNumberAsync(user);
+        _user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        _username = await UserManager.GetUserNameAsync(_user);
+        _phoneNumber = await UserManager.GetPhoneNumberAsync(_user);
 
-        Input.PhoneNumber ??= phoneNumber;
+        Input.PhoneNumber ??= _phoneNumber;
     }
 
     private async Task OnValidSubmitAsync() {
-        if (Input.PhoneNumber != phoneNumber) {
-            var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+        if (Input.PhoneNumber != _phoneNumber) {
+            var setPhoneResult = await UserManager.SetPhoneNumberAsync(_user, Input.PhoneNumber);
             if (!setPhoneResult.Succeeded) {
                 RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
             }
         }
 
-        await SignInManager.RefreshSignInAsync(user);
+        await SignInManager.RefreshSignInAsync(_user);
         RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
     }
 

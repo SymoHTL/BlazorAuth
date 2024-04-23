@@ -1,23 +1,73 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@inject NavigationManager NavigationManager
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
 
-        <article class="content px-4">
+<MudDialogProvider/>
+<MudThemeProvider IsDarkMode="true"/>
+<MudSnackbarProvider/>
+
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudStaticButton Href="/" Class="ml-3">
+            <MudText Typo="Typo.h5">Mudblazor Identity UI</MudText>
+        </MudStaticButton>
+        <MudSpacer/>
+        <AuthorizeView>
+            <Authorized>
+                <MudButton Class="px-3" Href="account/manage" StartIcon="@Icons.Material.Filled.Person">
+                    <MudText>@context.User.Identity?.Name</MudText>
+                </MudButton>
+                <form class="px-3" action="account/logout" method="post">
+                    <AntiforgeryToken/>
+                    <input type="hidden" name="ReturnUrl" value="@_currentUrl"/>
+                    <MudStaticButton StartIcon="@Icons.Material.Filled.Logout">
+                        Logout
+                    </MudStaticButton>
+                </form>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Class="px-3" Href="account/register" StartIcon="@Icons.Material.Filled.PersonAdd">
+                    <MudText>Register</MudText>
+                </MudButton>
+                <MudButton Class="px-3" Href="account/login" StartIcon="@Icons.Material.Filled.Login">
+                    <MudText>Login</MudText>
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.False">
             @Body
-        </article>
-    </main>
-</div>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
 
+@*
 <div id="blazor-error-ui">
     An unhandled error has occurred.
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
-</div>
+</div>*@
+
+@code {
+
+    private string? _currentUrl;
+
+    protected override void OnInitialized() {
+        _currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) {
+        _currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose() {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+}

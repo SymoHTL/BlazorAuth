@@ -1,46 +1,39 @@
-﻿@page "/Account/ResendEmailConfirmation"
-
-@using System.ComponentModel.DataAnnotations
-@using System.Text
-@using System.Text.Encodings.Web
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.WebUtilities
+﻿@page "/account/resendEmailConfirmation"
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Resend email confirmation</PageTitle>
 
-<h1>Resend email confirmation</h1>
-<h2>Enter your email.</h2>
-<hr/>
-<StatusMessage Message="@message"/>
+<MudText Typo="Typo.h2">Resend email confirmation</MudText>
+<MudText Typo="Typo.h3">Enter your email.</MudText>
+<MudDivider/>
+<StatusMessage Message="@_message"/>
 <div class="row">
     <div class="col-md-4">
         <EditForm Model="Input" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" aria-required="true" placeholder="name@example.com"/>
-                <label for="email" class="form-label">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger"/>
+                <MudStaticTextField @bind-Value="Input.Email" autocomplete="email" aria-required="true"
+                                    InputMode="InputMode.email" InputType="InputType.Email" Label="Email address"
+                                    Required="true" Placeholder="name@example.com" For="() => Input.Email"/>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Resend</button>
+            <MudStaticButton Variant="Variant.Filled" FullWidth="true" Color="Color.Info">Resend</MudStaticButton>
         </EditForm>
     </div>
 </div>
 
 @code {
-    private string? message;
+    private string? _message;
 
     [SupplyParameterFromForm] private InputModel Input{ get; set; } = new();
 
     private async Task OnValidSubmitAsync() {
         var user = await UserManager.FindByEmailAsync(Input.Email!);
         if (user is null) {
-            message = "Verification email sent. Please check your email.";
+            _message = "Verification email sent. Please check your email.";
             return;
         }
 
@@ -52,7 +45,7 @@
             new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
         await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-        message = "Verification email sent. Please check your email.";
+        _message = "Verification email sent. Please check your email.";
     }
 
     private sealed class InputModel {

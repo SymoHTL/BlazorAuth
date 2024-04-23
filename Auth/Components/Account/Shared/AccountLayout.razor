@@ -1,9 +1,9 @@
 ﻿@inherits LayoutComponentBase
-@layout Auth.Components.Layout.MainLayout
+@layout Layout.MainLayout
 @inject NavigationManager NavigationManager
 
 @if (HttpContext is null) {
-    <p>Loading...</p>
+    <MudText>Loading...</MudText>
 }
 else {
     @Body
