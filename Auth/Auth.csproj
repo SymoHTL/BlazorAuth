@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="BlazorPageScript" Version="1.0.0" />
         <PackageReference Include="Extensions.MudBlazor.StaticInput" Version="1.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.0.4" />

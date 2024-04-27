@@ -7,14 +7,14 @@
 
 <PageTitle>Log in</PageTitle>
 
-<MudText Typo="Typo.h1">Log in</MudText>
+<MudText Typo="Typo.h4">Log in</MudText>
 <div class="row">
     <div class="col-md-4">
         <section>
             <StatusMessage Message="@_errorMessage"/>
             <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                 <DataAnnotationsValidator/>
-                <MudText Typo="Typo.h2">Use a local account to log in.</MudText>
+                <MudText Typo="Typo.h6">Use a local account to log in.</MudText>
                 <MudDivider/>
                 <ValidationSummary class="text-danger" role="alert"/>
                 <div class="mb-3">
@@ -69,9 +69,16 @@
     }
 
     public async Task LoginUser() {
+        
+        var user = await SignInManager.UserManager.FindByEmailAsync(Input.Email);
+        if (user == null) {
+            _errorMessage = "Error: Invalid login attempt.";
+            return;
+        }
+
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        var result = await SignInManager.PasswordSignInAsync(user, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded) {
             Logger.LogInformation("User logged in");
             RedirectManager.RedirectTo(ReturnUrl);

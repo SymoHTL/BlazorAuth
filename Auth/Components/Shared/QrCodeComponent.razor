@@ -1,0 +1,10 @@
+﻿<div id="qrCode"></div>
+<div id="qrCodeData" data-url="@Value" data-width="@Width" data-height="@Height"></div>
+
+<PageScript Src="./Components/Shared/QrCodeComponent.razor.js"></PageScript>
+
+@code {
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public int Width { get; set; } = 350;
+    [Parameter] public int Height { get; set; } = 350;
+}

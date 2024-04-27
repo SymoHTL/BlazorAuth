@@ -1,6 +1,5 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using MudBlazor.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Model.Util;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,7 +56,12 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => {
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender>();
+
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"))
+    .AddOptionsWithValidateOnStart<MailSettings>()
+    .ValidateDataAnnotations();
 
 
 builder.Services.AddAuthentication()

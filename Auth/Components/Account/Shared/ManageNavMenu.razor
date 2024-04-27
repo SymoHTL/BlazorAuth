@@ -1,25 +1,25 @@
 ﻿@inject SignInManager<ApplicationUser> SignInManager
 
-<MudList>
-    <MudListItem>
-        <MudLink Href="account/manage">Profile</MudLink>
+<MudList Clickable="true">
+    <MudListItem Class="p-0">
+        <MudLink Class="d-block w-100 h-100 p-2" Href="account/manage" Underline="Underline.None">Profile</MudLink>
     </MudListItem>
-    <MudListItem>
-        <MudLink Href="account/manage/email">Email</MudLink>
+    <MudListItem Class="p-0">
+        <MudLink Class="d-block w-100 h-100 p-2" Href="account/manage/email" Underline="Underline.None">Email</MudLink>
     </MudListItem>
-    <MudListItem>
-        <MudLink Href="account/manage/changePassword">Password</MudLink>
+    <MudListItem Class="p-0">
+        <MudLink Class="d-block w-100 h-100 p-2" Href="account/manage/changePassword" Underline="Underline.None">Password</MudLink>
     </MudListItem>
     @if (_hasExternalLogins) {
-        <MudListItem>
-            <MudLink Href="account/manage/externalLogins">External logins</MudLink>
+        <MudListItem Class="p-0">
+            <MudLink Class="d-block w-100 h-100 p-2" Href="account/manage/externalLogins" Underline="Underline.None">External logins</MudLink>
         </MudListItem>
     }
-    <MudListItem>
-        <MudLink Href="account/manage/twoFactorAuthentication">Two-factor authentication</MudLink>
+    <MudListItem Class="p-0">
+        <MudLink Class="d-block w-100 h-100 p-2" Href="account/manage/twoFactorAuthentication" Underline="Underline.None">Two-factor authentication</MudLink>
     </MudListItem>
-    <MudListItem>
-        <MudLink Href="account/manage/personalData">Personal data</MudLink>
+    <MudListItem Class="p-0">
+        <MudLink Class="d-block w-100 h-100 p-2" Href="account/manage/personalData" Underline="Underline.None">Personal data</MudLink>
     </MudListItem>
 </MudList>
 

@@ -13,18 +13,16 @@
         <MudText>
             <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
         </MudText>
-        <form action="account/manage/downloadPersonalData" method="post">
+        <form action="account/manage/downloadPersonalData" method="post" class="my-4">
             <AntiforgeryToken/>
             <MudStaticButton Variant="Variant.Filled" Color="Color.Info">Download</MudStaticButton>
         </form>
-        <MudText>
-            <MudLink href="account/manage/deletePersonalData" class="btn btn-danger">Delete</MudLink>
-        </MudText>
+        <MudStaticButton Variant="Variant.Filled" Href="account/manage/deletePersonalData" Color="Color.Error">Delete</MudStaticButton>
     </div>
 </div>
 
 @code {
-    [CascadingParameter] private HttpContext HttpContext{ get; set; } = default!;
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync() {
         _ = await UserAccessor.GetRequiredUserAsync(HttpContext);

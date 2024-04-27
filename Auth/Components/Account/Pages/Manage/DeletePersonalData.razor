@@ -12,11 +12,11 @@
 
 <MudText Typo="Typo.h4">Delete Personal Data</MudText>
 
-<div class="alert alert-warning" role="alert">
+<MudAlert Severity="Severity.Error">
     <MudText>
         <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
     </MudText>
-</div>
+</MudAlert>
 
 <div>
     <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
@@ -29,7 +29,7 @@
                                     Required="true" For="() => Input.Password" Placeholder="Please enter your password."/>
             </div>
         }
-        <MudStaticButton Variant="Variant.Filled" FullWidth="true" Color="Color.Info">Delete data and close my account</MudStaticButton>
+        <MudStaticButton Variant="Variant.Filled" FullWidth="true" Color="Color.Error">Delete data and close my account</MudStaticButton>
     </EditForm>
 </div>
 
@@ -38,9 +38,9 @@
     private ApplicationUser _user = default!;
     private bool _requirePassword;
 
-    [CascadingParameter] private HttpContext HttpContext{ get; set; } = default!;
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
-    [SupplyParameterFromForm] private InputModel Input{ get; set; } = new();
+    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
 
     protected override async Task OnInitializedAsync() {
         _user = await UserAccessor.GetRequiredUserAsync(HttpContext);
@@ -67,7 +67,7 @@
     }
 
     private sealed class InputModel {
-        [DataType(DataType.Password)] public string Password{ get; set; } = "";
+        [DataType(DataType.Password)] public string Password { get; set; } = "";
     }
 
 }

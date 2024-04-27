@@ -37,16 +37,14 @@
     </MudSimpleTable>
 }
 @if (_otherLogins?.Count > 0) {
-    <MudText Typo="Typo.h5">Add another service to log in.</MudText>
+    <MudText Typo="Typo.h4">Add another service to log in.</MudText>
     <MudDivider/>
     <form class="form-horizontal" action="account/manage/linkExternalLogin" method="post">
         <AntiforgeryToken/>
         <div>
-            <MudText>
-                @foreach (var provider in _otherLogins) {
-                    <MudStaticButton Variant="Variant.Filled" FullWidth="true" Color="Color.Info" name="Provider" title=@($"Log in using your {provider.DisplayName} account")>@provider.DisplayName</MudStaticButton>
-                }
-            </MudText>
+            @foreach (var provider in _otherLogins) {
+                <MudStaticButton Class="my-3" Variant="Variant.Filled" FullWidth="true" Color="Color.Info" name="Provider" title=@($"Log in using your {provider.DisplayName} account")>@provider.DisplayName</MudStaticButton>
+            }
         </div>
     </form>
 }
@@ -59,13 +57,13 @@
     private IList<AuthenticationScheme>? _otherLogins;
     private bool _showRemoveButton;
 
-    [CascadingParameter] private HttpContext HttpContext{ get; set; } = default!;
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
-    [SupplyParameterFromForm] private string? LoginProvider{ get; set; }
+    [SupplyParameterFromForm] private string? LoginProvider { get; set; }
 
-    [SupplyParameterFromForm] private string? ProviderKey{ get; set; }
+    [SupplyParameterFromForm] private string? ProviderKey { get; set; }
 
-    [SupplyParameterFromQuery] private string? Action{ get; set; }
+    [SupplyParameterFromQuery] private string? Action { get; set; }
 
     protected override async Task OnInitializedAsync() {
         _user = await UserAccessor.GetRequiredUserAsync(HttpContext);
