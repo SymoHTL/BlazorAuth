@@ -56,7 +56,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions {
                 context.Request.PathBase,
                 "/Account/Manage/ExternalLogins",
                 QueryString.Create("Action", ExternalLogins.LinkLoginCallbackAction));
-
+            
             var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl,
                 signInManager.UserManager.GetUserId(context.User));
             return TypedResults.Challenge(properties, [provider]);

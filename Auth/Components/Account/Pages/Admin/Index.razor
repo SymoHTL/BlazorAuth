@@ -1,0 +1,65 @@
+﻿@page "/admin/users"
+@inject Repository<ApplicationUser> UserRepo
+@implements IDisposable
+@rendermode InteractiveServer
+
+<MudTable @ref="_table" T="ApplicationUser" Hover="true" ServerData="LoadUsers">
+    <ToolBarContent>
+        <MudTextField T="string" Value="@Search" Label="Search" Variant="Variant.Outlined" ValueChanged="SearchChanged" />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>
+            <MudTableSortLabel T="ApplicationUser" SortLabel="Id" SortBy="u => u.Id">
+                Id
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel T="ApplicationUser" SortLabel="Username" SortBy="u => u.UserName!">
+                Username
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel T="ApplicationUser" SortLabel="Email" SortBy="u => u.Email!">
+                Email
+            </MudTableSortLabel>
+        </MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Id</MudTd>
+        <MudTd>@context.UserName</MudTd>
+        <MudTd>@context.Email</MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private MudTable<ApplicationUser> _table = null!;
+    
+    private string Search { get; set; } = string.Empty;
+
+    private readonly CancellationTokenSource _cts = new();
+
+    private async Task<TableData<ApplicationUser>> LoadUsers(TableState state) {
+        var skip = state.Page * state.PageSize;
+        var take = state.PageSize;
+        
+        await UserRepo.FirstOrDefaultAsync("UserName", Search, _cts.Token);
+        await UserRepo.FirstOrDefaultAsync(a => a.UserName, Search, _cts.Token);
+
+        var users = await UserRepo
+            .Search("UserName", Search, skip, take)
+            .ToArrayAsync(_cts.Token);
+        var total = await UserRepo.CountAsync("UserName", Search, _cts.Token);
+
+        return new TableData<ApplicationUser> { Items = users, TotalItems = total };
+    }
+
+    public void Dispose() {
+        _cts.Dispose();
+    }
+
+    private Task SearchChanged(string value) {
+        Search = value.Trim();
+        return _table.ReloadServerData();
+    }
+
+}

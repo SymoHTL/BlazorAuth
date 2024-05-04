@@ -1,3 +1,4 @@
+using Domain.Repositories;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Model.Util;
 
@@ -62,6 +63,9 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityEmailSender
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"))
     .AddOptionsWithValidateOnStart<MailSettings>()
     .ValidateDataAnnotations();
+
+
+builder.Services.AddScoped<Repository<ApplicationUser>>();
 
 
 builder.Services.AddAuthentication()
